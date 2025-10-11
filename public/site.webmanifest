@@ -1,0 +1,24 @@
+{
+  "name": "Wittgenstein's Word Game Manual",
+  "short_name": "Word Game",
+  "description": "Generate bilingual game manuals explaining word usage through language-game philosophy",
+  "icons": [
+    {
+      "src": "/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "theme_color": "#0f172a",
+  "background_color": "#0f172a",
+  "display": "standalone",
+  "start_url": "/",
+  "orientation": "portrait-primary"
+}
