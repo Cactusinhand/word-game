@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { GameManual } from './types';
-import { generateGameManual } from './services/geminiService';
+import { generateGameManual, activeProviderName } from './services/aiService';
 import WordInputForm from './components/WordInputForm';
 import ManualDisplay from './components/ManualDisplay';
 import LoadingSpinner from './components/LoadingSpinner';
@@ -47,7 +47,7 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-4 sm:p-8 flex flex-col items-center">
+    <div className="min-h-screen bg-slate-900 text-white p-4 sm:p-6 md:p-8 flex flex-col items-center">
       <style>{`
         @keyframes fade-in {
             from { opacity: 0; transform: translateY(10px); }
@@ -56,19 +56,23 @@ const App: React.FC = () => {
         .animate-fade-in { animation: fade-in 0.5s ease-out forwards; }
       `}</style>
       <div className="w-full max-w-4xl">
-        <header className="text-center my-6">
-          <h1 className="text-4xl sm:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-cyan-500">
+        <header className="text-center my-4 sm:my-6">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-cyan-500">
             Wittgenstein's Word Game Manual
           </h1>
-          {showChinese && <h2 className="text-3xl sm:text-4xl font-bold text-cyan-300 mt-2">维特根斯坦的文字游戏手册</h2>}
-          <p className="text-slate-400 mt-2 text-lg">
+          {showChinese && <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-cyan-300 mt-2">维特根斯坦的文字游戏手册</h2>}
+          <p className="text-slate-400 mt-2 text-base sm:text-lg">
             Don't ask for the meaning, ask for the use.
           </p>
           {showChinese && <p className="text-slate-400 mt-1">不要问意义，要问用法。</p>}
         </header>
 
         <main className="mt-8">
-          <WordInputForm onSubmit={handleGenerateManual} isLoading={isLoading} />
+          <WordInputForm 
+            onSubmit={handleGenerateManual} 
+            isLoading={isLoading} 
+            providerName={activeProviderName}
+          />
           
           <div className="mt-10">
             {isLoading && <LoadingSpinner />}

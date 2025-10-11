@@ -79,25 +79,20 @@ const ManualDisplay: React.FC<ManualDisplayProps> = ({ manual, showChinese, setS
 
   return (
     <div className="w-full max-w-4xl mx-auto animate-fade-in">
-       <div className="flex justify-center items-center flex-wrap gap-4 mb-8">
-        <label htmlFor="bilingual-toggle" className="flex items-center cursor-pointer">
-          <span className="mr-3 text-sm text-slate-400 font-medium">Show Chinese Translation</span>
-          <div className="relative">
-            <input
-              type="checkbox"
-              id="bilingual-toggle"
-              className="sr-only"
-              checked={showChinese}
-              onChange={() => setShowChinese(!showChinese)}
-            />
-            <div className="block bg-slate-700 w-14 h-8 rounded-full"></div>
-            <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform duration-300 ease-in-out ${showChinese ? 'transform translate-x-6 bg-emerald-400' : ''}`}></div>
-          </div>
-        </label>
+       <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-8">
+         <button
+          onClick={() => setShowChinese(!showChinese)}
+          className="bg-slate-700 text-white font-semibold py-2 px-5 rounded-full transition-all duration-300 text-sm shadow-lg w-full sm:w-auto"
+          aria-label="Toggle Chinese translation"
+        >
+          <span className={!showChinese ? 'text-emerald-400' : 'text-slate-400'}>English</span>
+          <span className="mx-2 text-slate-500">|</span>
+          <span className={showChinese ? 'text-cyan-400' : 'text-slate-400'}>中文</span>
+        </button>
         <button
           onClick={handleDownloadImage}
           disabled={isCapturing}
-          className="flex items-center gap-2 bg-slate-700 hover:bg-emerald-500 disabled:bg-slate-600 text-white font-semibold py-2 px-5 rounded-full transition-all duration-300 text-sm shadow-lg"
+          className="flex items-center justify-center gap-2 bg-slate-700 hover:bg-emerald-500 disabled:bg-slate-600 text-white font-semibold py-2 px-5 rounded-full transition-all duration-300 text-sm shadow-lg w-full sm:w-auto"
           aria-label="Download manual as image"
         >
           <DownloadIcon />
@@ -105,7 +100,7 @@ const ManualDisplay: React.FC<ManualDisplayProps> = ({ manual, showChinese, setS
         </button>
         <button
           onClick={handleShareLink}
-          className="flex items-center gap-2 bg-slate-700 hover:bg-cyan-500 text-white font-semibold py-2 px-5 rounded-full transition-all duration-300 text-sm shadow-lg"
+          className="flex items-center justify-center gap-2 bg-slate-700 hover:bg-cyan-500 text-white font-semibold py-2 px-5 rounded-full transition-all duration-300 text-sm shadow-lg w-full sm:w-auto"
           aria-label="Copy share link"
         >
           <ShareIcon />
@@ -115,15 +110,15 @@ const ManualDisplay: React.FC<ManualDisplayProps> = ({ manual, showChinese, setS
 
       <div ref={manualRef} className="space-y-6 bg-slate-900 p-4 sm:p-8">
         <header className="text-center mb-10">
-          <h2 className="text-5xl font-extrabold text-white">
+          <h2 className="text-4xl sm:text-5xl font-extrabold text-white">
             Game Manual: <span className="text-emerald-400 capitalize">{manual.targetWord.en}</span>
           </h2>
-          {showChinese && <h3 className="text-4xl font-bold text-cyan-400 mt-2">游戏手册: <span className="capitalize">{manual.targetWord.zh}</span></h3>}
+          {showChinese && <h3 className="text-3xl sm:text-4xl font-bold text-cyan-400 mt-2">游戏手册: <span className="capitalize">{manual.targetWord.zh}</span></h3>}
           <p className="text-slate-400 mt-4">Your guide to mastering the language game.</p>
           {showChinese && <p className="text-slate-400 mt-1">你掌握语言游戏的向导。</p>}
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <div className="md:col-span-2">
               <ManualCard title={manual.coreGame.title} icon={<TargetIcon />} showChinese={showChinese}>
                   <p className="text-lg italic">{manual.coreGame.description.en}</p>
