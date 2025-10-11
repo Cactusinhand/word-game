@@ -1,0 +1,7 @@
+# Cloudflare Pages configuration for local development
+name = "wittgenstein-word-game-manual"
+compatibility_date = "2025-10-11"
+compatibility_flags = ["nodejs_compat"]
+
+[env.production]
+# Production environment variables will be set in Cloudflare Dashboard
