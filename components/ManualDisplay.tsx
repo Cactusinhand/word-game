@@ -113,9 +113,9 @@ const ManualDisplay: React.FC<ManualDisplayProps> = ({ manual, showChinese, setS
           <h2 className="text-4xl sm:text-5xl font-extrabold text-white">
             Word Manual: <span className="text-emerald-400 capitalize">{manual.targetWord.en}</span>
           </h2>
-          {showChinese && <h3 className="text-3xl sm:text-4xl font-bold text-cyan-400 mt-2">游戏手册: <span className="capitalize">{manual.targetWord.zh}</span></h3>}
-          <p className="text-slate-400 mt-4">Your guide to mastering the language game.</p>
-          {showChinese && <p className="text-slate-400 mt-1">你掌握语言游戏的向导。</p>}
+          {showChinese && <h3 className="text-3xl sm:text-4xl font-bold text-cyan-400 mt-2">单词手册: <span className="capitalize">{manual.targetWord.en}</span></h3>}
+          <p className="text-slate-400 mt-6">Your guide to mastering the language game.</p>
+          {showChinese && <p className="text-slate-400 mt-2">你掌握语言游戏的向导。</p>}
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
