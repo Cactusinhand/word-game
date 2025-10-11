@@ -19,13 +19,23 @@ const App: React.FC = () => {
     const data = urlParams.get('data');
 
     if (data) {
+      console.log('Found encoded data in URL:', data);
       setIsLoading(true);
-      const decodedManual = decodeManualFromUrl(data);
-      if (decodedManual) {
-        setManual(decodedManual);
-      } else {
+
+      try {
+        const decodedManual = decodeManualFromUrl(data);
+        console.log('Decoded manual:', decodedManual);
+
+        if (decodedManual) {
+          setManual(decodedManual);
+        } else {
+          setError("Could not load the shared manual. The link might be corrupted.");
+        }
+      } catch (error) {
+        console.error('Error decoding shared manual:', error);
         setError("Could not load the shared manual. The link might be corrupted.");
       }
+
       // Clean the URL to avoid re-processing on refresh
       window.history.replaceState({}, document.title, window.location.pathname);
       setIsLoading(false);

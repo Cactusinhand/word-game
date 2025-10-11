@@ -66,15 +66,27 @@ const ManualDisplay: React.FC<ManualDisplayProps> = ({ manual, showChinese, setS
 
   const handleShareLink = () => {
     if (isCopied) return;
-    const encodedData = encodeManualForUrl(manual);
-    // Assuming the app is hosted at the root. For other paths, window.location.pathname should be used.
-    const url = `${window.location.origin}${window.location.pathname}?data=${encodedData}`;
-    navigator.clipboard.writeText(url).then(() => {
+
+    try {
+      console.log('Manual to encode:', manual);
+      const encodedData = encodeManualForUrl(manual);
+      console.log('Encoded data:', encodedData);
+
+      // Use current origin for all environments - this ensures localhost uses localhost
+      const baseUrl = window.location.origin;
+      const url = `${baseUrl}?data=${encodedData}`;
+      console.log('Generated share URL:', url);
+
+      navigator.clipboard.writeText(url).then(() => {
         setIsCopied(true);
         setTimeout(() => setIsCopied(false), 2500); // Reset after 2.5 seconds
-    }, (err) => {
+        console.log('Share link copied successfully!');
+      }, (err) => {
         console.error('Could not copy text: ', err);
-    });
+      });
+    } catch (error) {
+      console.error('Error in handleShareLink:', error);
+    }
   };
 
   return (

@@ -9,10 +9,12 @@ import { GameManual } from '../types';
 export const encodeManualForUrl = (manual: GameManual): string => {
   try {
     const jsonString = JSON.stringify(manual);
-    // Use pako to GZIP compress the string
-    const compressed = pako.deflate(jsonString, { to: 'string' });
-    // btoa is fine for URL query parameter as long as it's not part of the path
-    return btoa(compressed); 
+    // Use pako to GZIP compress the string to Uint8Array
+    const compressed = pako.deflate(jsonString);
+    // Convert Uint8Array to Base64, then make it URL-safe
+    const base64 = btoa(String.fromCharCode(...compressed));
+    // Make it URL-safe by replacing + and / with URL-safe characters
+    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
   } catch (error) {
     console.error("Failed to encode manual:", error);
     return "";
@@ -26,12 +28,27 @@ export const encodeManualForUrl = (manual: GameManual): string => {
  */
 export const decodeManualFromUrl = (encodedData: string): GameManual | null => {
   try {
-    const compressed = atob(encodedData);
-    // Use pako to inflate the GZIP compressed string
-    const jsonString = pako.inflate(compressed, { to: 'string' });
+    // Reverse the URL-safe encoding
+    let base64 = encodedData.replace(/-/g, '+').replace(/_/g, '/');
+    // Add padding back if needed
+    while (base64.length % 4) {
+      base64 += '=';
+    }
+
+    // Decode Base64 to binary string
+    const binaryString = atob(base64);
+    // Convert binary string to Uint8Array
+    const uint8Array = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      uint8Array[i] = binaryString.charCodeAt(i);
+    }
+
+    // Use pako to inflate the data
+    const jsonString = pako.inflate(uint8Array, { to: 'string' });
     return JSON.parse(jsonString) as GameManual;
   } catch (error) {
     console.error("Failed to decode manual from URL:", error);
+    console.error("Encoded data was:", encodedData?.substring(0, 100) + "...");
     return null;
   }
 };
