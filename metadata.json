@@ -1,0 +1,5 @@
+{
+  "name": "Wittgenstein's Word Game Manual",
+  "description": "An application that acts as a 'Language Game Designer', providing a unique and insightful 'game manual' for any English word, based on the philosophy of Wittgenstein. It explains how to use words in context rather than just defining them.",
+  "requestFramePermissions": []
+}
