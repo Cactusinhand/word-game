@@ -1,0 +1,3 @@
+# Cloudflare Pages redirects configuration
+# Handle clean URLs
+/*  /index.html   200

@@ -111,7 +111,7 @@ const ManualDisplay: React.FC<ManualDisplayProps> = ({ manual, showChinese, setS
       <div ref={manualRef} className="space-y-6 bg-slate-900 p-4 sm:p-8">
         <header className="text-center mb-10">
           <h2 className="text-4xl sm:text-5xl font-extrabold text-white">
-            Game Manual: <span className="text-emerald-400 capitalize">{manual.targetWord.en}</span>
+            Word Manual: <span className="text-emerald-400 capitalize">{manual.targetWord.en}</span>
           </h2>
           {showChinese && <h3 className="text-3xl sm:text-4xl font-bold text-cyan-400 mt-2">游戏手册: <span className="capitalize">{manual.targetWord.zh}</span></h3>}
           <p className="text-slate-400 mt-4">Your guide to mastering the language game.</p>

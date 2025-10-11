@@ -1,0 +1,15 @@
+# Cloudflare Pages headers configuration
+# Security headers
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# Enable gzip compression for static assets
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# HTML files
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate

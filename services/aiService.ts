@@ -161,31 +161,32 @@ class OpenAICompatibleProvider implements IAiProvider {
 // 4. FACTORY AND EXPORT ================================================
 
 function createAiProvider(): { provider: IAiProvider; name: string } {
-  if (process.env.API_KEY) {
-    console.log("Using Google Gemini provider.");
-    return { provider: new GeminiProvider(), name: 'Gemini' };
-  } else if (process.env.OPENAI_API_KEY) {
-    console.log("Using OpenAI provider.");
-    return { 
-        provider: new OpenAICompatibleProvider(
-            process.env.OPENAI_API_KEY,
-            'https://api.openai.com/v1/chat/completions',
-            'gpt-4o'
-        ), 
-        name: 'OpenAI' 
-    };
-  } else if (process.env.DEEPSEEK_API_KEY) {
+  // Temporarily prioritize DeepSeek for debugging
+  if (process.env.DEEPSEEK_API_KEY) {
     console.log("Using DeepSeek provider.");
-    return { 
+    return {
         provider: new OpenAICompatibleProvider(
             process.env.DEEPSEEK_API_KEY,
             'https://api.deepseek.com/v1/chat/completions',
             'deepseek-chat'
-        ), 
-        name: 'DeepSeek' 
+        ),
+        name: 'DeepSeek'
+    };
+  } else if (process.env.API_KEY) {
+    console.log("Using Google Gemini provider.");
+    return { provider: new GeminiProvider(), name: 'Gemini' };
+  } else if (process.env.OPENAI_API_KEY) {
+    console.log("Using OpenAI provider.");
+    return {
+        provider: new OpenAICompatibleProvider(
+            process.env.OPENAI_API_KEY,
+            'https://api.openai.com/v1/chat/completions',
+            'gpt-4o'
+        ),
+        name: 'OpenAI'
     };
   }
-  
+
   throw new Error("No AI provider API key found. Please set API_KEY (for Gemini), OPENAI_API_KEY, or DEEPSEEK_API_KEY in your environment variables.");
 }
 
