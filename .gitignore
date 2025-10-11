@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 
 tmpnpm-cache/
+.claude/
+.serena/
+CLAUDE.md
