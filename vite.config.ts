@@ -11,10 +11,7 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [react()],
       define: {
-        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.OPENAI_API_KEY': JSON.stringify(env.OPENAI_API_KEY),
-        'process.env.DEEPSEEK_API_KEY': JSON.stringify(env.DEEPSEEK_API_KEY),
+        // Only expose the production domain, NO API KEYS in frontend
         'process.env.PRODUCTION_DOMAIN': JSON.stringify(env.PRODUCTION_DOMAIN || 'https://word.githubcard.com')
       },
       resolve: {

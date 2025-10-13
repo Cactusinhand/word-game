@@ -27,3 +27,4 @@ tmpnpm-cache/
 .claude/
 .serena/
 CLAUDE.md
+.wrangler/

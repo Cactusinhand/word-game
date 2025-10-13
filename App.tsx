@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { GameManual } from './types';
-import { generateGameManual, activeProviderName } from './services/aiService';
+import { generateGameManual, activeProviderName } from './services/secureAiService';
 import WordInputForm from './components/WordInputForm';
 import ManualDisplay from './components/ManualDisplay';
 import LoadingSpinner from './components/LoadingSpinner';
@@ -78,10 +78,10 @@ const App: React.FC = () => {
         </header>
 
         <main className="mt-8">
-          <WordInputForm 
-            onSubmit={handleGenerateManual} 
-            isLoading={isLoading} 
-            providerName={activeProviderName}
+          <WordInputForm
+            onSubmit={handleGenerateManual}
+            isLoading={isLoading}
+            providerName={activeProviderName()}
           />
           
           <div className="mt-10">
