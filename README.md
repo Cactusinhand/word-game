@@ -47,7 +47,7 @@ A React + TypeScript application that generates bilingual (English/Chinese) game
 
 ## 🎮 Features
 
-- **AI-Powered Manual Generation**: Creates detailed game manuals for any word using multiple AI providers (DeepSeek, Gemini, OpenAI)
+- **AI-Powered Manual Generation**: Creates detailed game manuals for any word using multiple AI providers (GLM/Zhipu, DeepSeek, Gemini, OpenAI)
 - **Bilingual Support**: Full English/Chinese translation with toggle functionality
 - **Export Options**: Download manuals as images or share via URL
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
@@ -64,36 +64,42 @@ A React + TypeScript application that generates bilingual (English/Chinese) game
 ### Installation
 
 1. Clone the repository
-   
+
    ```bash
    git clone https://github.com/Cactusinhand/word-game.git
    cd word-game
    ```
 
 2. Install dependencies
-   
+
    ```bash
    npm install
    ```
 
 3. Set up environment variables
    Create a `.env.local` file in the root directory:
-   
+
    ```bash
-   # Choose ONE of the following API keys:
-   
+   # Choose ONE of the following API keys (priority order: GLM > DeepSeek > Gemini > OpenAI):
+
+   # Option 0: GLM (Zhipu AI, OpenAI-compatible)
+   # Base URL defaults to https://open.bigmodel.cn/api/paas/v4
+   GLM_API_KEY=your_glm_api_key_here
+   # Optional override (or use ZHIPU_BASE_URL)
+   # GLM_BASE_URL=https://open.bigmodel.cn/api/paas/v4
+
    # Option 1: DeepSeek (recommended, cost-effective)
    DEEPSEEK_API_KEY=your_deepseek_api_key_here
-   
+
    # Option 2: Google Gemini
    GEMINI_API_KEY=your_gemini_api_key_here
-   
+
    # Option 3: OpenAI
    OPENAI_API_KEY=your_openai_api_key_here
    ```
 
 4. Run the development server
-   
+
    ```bash
    npm run dev
    ```
@@ -132,13 +138,13 @@ Each generated manual follows Wittgenstein's language game approach:
 ### Cloudflare Pages (Recommended)
 
 1. **Build the project**
-   
+
    ```bash
    npm run build
    ```
 
 2. **Deploy to Cloudflare Pages**
-   
+
    - Connect your GitHub repository to Cloudflare Pages
    - Use the following build settings:
      - **Build command**: `npm run build`
@@ -147,18 +153,23 @@ Each generated manual follows Wittgenstein's language game approach:
 
 3. **Set Environment Variables**
    Add your API key in Cloudflare Pages dashboard:
-   
+
    ```
-   DEEPSEEK_API_KEY=your_actual_api_key_here
+   # One of the supported providers, for example GLM/Zhipu:
+   GLM_API_KEY=your_actual_api_key_here
+   # (Optional) GLM_BASE_URL=https://open.bigmodel.cn/api/paas/v4
    ```
 
 ### Environment Variables
 
-| Variable           | Description           | Required                 |
-| ------------------ | --------------------- | ------------------------ |
-| `DEEPSEEK_API_KEY` | DeepSeek AI API key   | ✅ (or one of the others) |
-| `GEMINI_API_KEY`   | Google Gemini API key | ✅ (or one of the others) |
-| `OPENAI_API_KEY`   | OpenAI API key        | ✅ (or one of the others) |
+| Variable            | Description                                | Required                  |
+| ------------------- | ------------------------------------------ | ------------------------- |
+| `GLM_API_KEY`       | GLM (Zhipu) OpenAI-compatible API key      | ✅ (or one of the others) |
+| `GLM_BASE_URL`      | GLM base URL (default provided)            | ❌                        |
+| `DEEPSEEK_API_KEY`  | DeepSeek AI API key                        | ✅ (or one of the others) |
+| `DEEPSEEK_BASE_URL` | DeepSeek base URL (default provided)       | ❌                        |
+| `GEMINI_API_KEY`    | Google Gemini API key                      | ✅ (or one of the others) |
+| `OPENAI_API_KEY`    | OpenAI API key                             | ✅ (or one of the others) |
 
 ## 🤝 Contributing
 

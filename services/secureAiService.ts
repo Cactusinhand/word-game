@@ -19,14 +19,14 @@ class SecureAiService {
     }
   }
 
-  async generateGameManual(word: string): Promise<GameManual> {
+  async generateGameManual(word: string, providerId?: string): Promise<GameManual> {
     try {
       const response = await fetch(`${this.apiBaseUrl}/api/ai-generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ word: word.trim() }),
+        body: JSON.stringify({ word: word.trim(), provider: providerId }),
       });
 
       if (!response.ok) {
@@ -61,8 +61,18 @@ class SecureAiService {
 
 // Export singleton instance
 const secureAiService = new SecureAiService();
-export const generateGameManual = (word: string): Promise<GameManual> => {
-  return secureAiService.generateGameManual(word);
+export const generateGameManual = (word: string, providerId?: string): Promise<GameManual> => {
+  return secureAiService.generateGameManual(word, providerId);
 };
 
 export const activeProviderName = secureAiService.getProviderName.bind(secureAiService);
+
+export async function listAvailableProviders(): Promise<{ providers: { id: string; name: string }[]; default: string | null }> {
+  const baseUrl = (typeof window !== 'undefined') ? window.location.origin : '';
+  const url = `${baseUrl}/api/ai-providers`;
+  const res = await fetch(url, { method: 'GET' });
+  if (!res.ok) {
+    throw new Error(`Failed to load providers: ${res.status} ${res.statusText}`);
+  }
+  return res.json();
+}
