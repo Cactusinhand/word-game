@@ -31,7 +31,10 @@ class SecureAiService {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: { message: 'Could not parse error response.' } }));
-        throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorData.error?.message || 'Unknown API error'}`);
+        const err: any = new Error(errorData?.error?.message || `API Error: ${response.status} ${response.statusText}`);
+        err.payload = errorData;
+        err.status = response.status;
+        throw err;
       }
 
       const data = await response.json();
@@ -42,9 +45,13 @@ class SecureAiService {
       }
 
       return data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error calling secure AI service:', error);
-      throw new Error("Failed to generate the game manual. The service may be unavailable or the input might be invalid.");
+      // Preserve structured payload if present
+      if (error && (error as any).payload) {
+        throw error;
+      }
+      throw new Error(error?.message || "Failed to generate the game manual. The service may be unavailable or the input might be invalid.");
     }
   }
 

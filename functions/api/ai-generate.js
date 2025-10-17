@@ -67,11 +67,40 @@ export async function onRequestPost(context) {
     if (hasGemini) available.push('gemini');
     if (hasOpenAI) available.push('openai');
 
+    function suggestSwitch(failedId, errorMessage) {
+      const order = ['glm', 'deepseek', 'gemini', 'openai'];
+      const availableSet = new Set(available);
+      let recommended = null;
+      if (failedId === 'glm' && availableSet.has('deepseek')) recommended = 'deepseek';
+      else if (failedId === 'deepseek' && availableSet.has('glm')) recommended = 'glm';
+      else {
+        for (const id of order) {
+          if (id !== failedId && availableSet.has(id)) { recommended = id; break; }
+        }
+      }
+      return {
+        error: { message: `Provider '${failedId}' failed: ${errorMessage}` },
+        suggestion: {
+          action: 'switch_provider',
+          from: failedId,
+          recommended,
+          available,
+          reason: errorMessage,
+          message: recommended ? `The ${failedId} service seems unavailable. Switch to ${recommended.toUpperCase()}?` : 'The selected service seems unavailable.'
+        }
+      };
+    }
+
     // If client requested a provider, honor it if available
     if (requested) {
       if (['glm', 'zhipu', 'glm-4.5-air', 'glm_4.5_air'].includes(requested)) {
         if (hasGLM) {
-          await useGLM();
+          try {
+            await useGLM();
+          } catch (e) {
+            const payload = suggestSwitch('glm', e.message || 'Unknown error');
+            return new Response(JSON.stringify(payload), { status: 502, headers: corsHeaders });
+          }
         } else {
           return new Response(
             JSON.stringify({ error: { message: 'Requested provider GLM is not available on server.' }, available }),
@@ -80,7 +109,12 @@ export async function onRequestPost(context) {
         }
       } else if (['deepseek', 'deepseek-chat'].includes(requested)) {
         if (hasDeepSeek) {
-          await useDeepSeek();
+          try {
+            await useDeepSeek();
+          } catch (e) {
+            const payload = suggestSwitch('deepseek', e.message || 'Unknown error');
+            return new Response(JSON.stringify(payload), { status: 502, headers: corsHeaders });
+          }
         } else {
           return new Response(
             JSON.stringify({ error: { message: 'Requested provider DeepSeek is not available on server.' }, available }),
@@ -89,7 +123,11 @@ export async function onRequestPost(context) {
         }
       } else if (['gemini'].includes(requested)) {
         if (hasGemini) {
-          await useGemini();
+          try {
+            await useGemini();
+          } catch (e) {
+            return new Response(JSON.stringify({ error: { message: `Gemini failed: ${e.message || 'Unknown error'}` } }), { status: 502, headers: corsHeaders });
+          }
         } else {
           return new Response(
             JSON.stringify({ error: { message: 'Requested provider Gemini is not available on server.' }, available }),
@@ -98,7 +136,11 @@ export async function onRequestPost(context) {
         }
       } else if (['openai', 'gpt-4o'].includes(requested)) {
         if (hasOpenAI) {
-          await useOpenAI();
+          try {
+            await useOpenAI();
+          } catch (e) {
+            return new Response(JSON.stringify({ error: { message: `OpenAI failed: ${e.message || 'Unknown error'}` } }), { status: 502, headers: corsHeaders });
+          }
         } else {
           return new Response(
             JSON.stringify({ error: { message: 'Requested provider OpenAI is not available on server.' }, available }),
@@ -110,17 +152,24 @@ export async function onRequestPost(context) {
 
     // If not selected above, pick default by priority
     if (!aiResponse) {
-      if (hasGLM) await useGLM();
-      else if (hasDeepSeek) await useDeepSeek();
-      else if (hasGemini) await useGemini();
-      else if (hasOpenAI) await useOpenAI();
-      else {
-        return new Response(
-          JSON.stringify({
-            error: { message: 'No AI provider API key configured. Please set GLM_API_KEY (or ZHIPU_API_KEY), DEEPSEEK_API_KEY, GEMINI_API_KEY, or OPENAI_API_KEY in your environment variables.' }
-          }),
-          { status: 500, headers: corsHeaders }
-        );
+      try {
+        if (hasGLM) await useGLM();
+        else if (hasDeepSeek) await useDeepSeek();
+        else if (hasGemini) await useGemini();
+        else if (hasOpenAI) await useOpenAI();
+        else {
+          return new Response(
+            JSON.stringify({
+              error: { message: 'No AI provider API key configured. Please set GLM_API_KEY (or ZHIPU_API_KEY), DEEPSEEK_API_KEY, GEMINI_API_KEY, or OPENAI_API_KEY in your environment variables.' }
+            }),
+            { status: 500, headers: corsHeaders }
+          );
+        }
+      } catch (e) {
+        // Suggest next available instead of auto fallback
+        const first = available[0];
+        const payload = suggestSwitch(first || 'unknown', e.message || 'Unknown error');
+        return new Response(JSON.stringify(payload), { status: 502, headers: corsHeaders });
       }
     }
 
@@ -214,18 +263,23 @@ The structure you must follow is:
   if (fenced && fenced[1]) {
     jsonText = fenced[1].trim();
   }
+  let parsed;
   try {
-    return JSON.parse(jsonText);
+    parsed = JSON.parse(jsonText);
   } catch (e) {
     // Fallback: try to extract the first JSON object substring
     const start = jsonText.indexOf('{');
     const end = jsonText.lastIndexOf('}');
     if (start !== -1 && end !== -1 && end > start) {
       const candidate = jsonText.slice(start, end + 1);
-      return JSON.parse(candidate);
+      parsed = JSON.parse(candidate);
+    } else {
+      throw new Error('GLM returned non-JSON content');
     }
-    throw new Error('GLM returned non-JSON content');
   }
+  // Basic structure validation
+  validateManualStructure(parsed);
+  return parsed;
 }
 
 // DeepSeek API implementation
@@ -276,6 +330,7 @@ Follow these content guidelines for each section:
     },
     body: JSON.stringify({
       model: 'deepseek-chat',
+      temperature: 0.2,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: `Generate the game manual for the word: "${word}"` }
@@ -290,8 +345,56 @@ Follow these content guidelines for each section:
   }
 
   const data = await response.json();
-  const jsonText = data.choices[0].message.content;
-  return JSON.parse(jsonText);
+  let jsonText = data.choices?.[0]?.message?.content;
+  if (!jsonText || typeof jsonText !== 'string') {
+    throw new Error('DeepSeek API returned an unexpected response format.');
+  }
+  const fenced = jsonText.match(/```[a-zA-Z]*\n([\s\S]*?)```/);
+  if (fenced && fenced[1]) {
+    jsonText = fenced[1].trim();
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(jsonText);
+  } catch (e) {
+    const start = jsonText.indexOf('{');
+    const end = jsonText.lastIndexOf('}');
+    if (start !== -1 && end !== -1 && end > start) {
+      const candidate = jsonText.slice(start, end + 1);
+      parsed = JSON.parse(candidate);
+    } else {
+      throw new Error('DeepSeek returned non-JSON content');
+    }
+  }
+  validateManualStructure(parsed);
+  return parsed;
+}
+
+// Minimal schema validation to enforce key fields and bilingual strings
+function validateManualStructure(obj) {
+  if (!obj || typeof obj !== 'object') {
+    throw new Error('Response is not a JSON object');
+  }
+  const requiredTop = ['targetWord', 'coreGame', 'gameBoards', 'originAndTeardown', 'foulWarning', 'masteryTip'];
+  for (const k of requiredTop) {
+    if (!(k in obj)) throw new Error(`Missing key '${k}' in response`);
+  }
+  function hasBilingual(node, label) {
+    if (!node || typeof node !== 'object') throw new Error(`'${label}' must be an object`);
+    if (typeof node.en !== 'string' || typeof node.zh !== 'string') throw new Error(`'${label}' must contain 'en' and 'zh' strings`);
+  }
+  try {
+    hasBilingual(obj.targetWord, 'targetWord');
+    hasBilingual(obj.coreGame?.title, 'coreGame.title');
+    hasBilingual(obj.coreGame?.description, 'coreGame.description');
+    hasBilingual(obj.gameBoards?.title, 'gameBoards.title');
+    if (!obj.gameBoards?.boardA || !obj.gameBoards?.boardB) throw new Error('Missing gameBoards.boardA or boardB');
+    hasBilingual(obj.foulWarning?.title, 'foulWarning.title');
+    hasBilingual(obj.masteryTip?.title, 'masteryTip.title');
+  } catch (e) {
+    // Re-throw with a concise message
+    throw new Error(`Invalid manual structure: ${e.message}`);
+  }
 }
 
 // Gemini API implementation (simplified for Cloudflare Functions)

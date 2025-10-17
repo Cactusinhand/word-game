@@ -22,6 +22,7 @@ const App: React.FC = () => {
   const [selectedProviderId, setSelectedProviderId] = useState<string | null>(
     null,
   );
+  const [suggestion, setSuggestion] = useState<{ recommended: string; message?: string; reason?: string } | null>(null);
 
   // This effect runs once on component mount to check for shared data in the URL
   useEffect(() => {
@@ -78,6 +79,7 @@ const App: React.FC = () => {
     async (word: string) => {
       setIsLoading(true);
       setError(null);
+      setSuggestion(null);
       setManual(null);
       try {
         const result = await generateGameManual(
@@ -86,7 +88,14 @@ const App: React.FC = () => {
         );
         setManual(result);
       } catch (err: any) {
-        setError(err.message || "An unknown error occurred.");
+        if (err?.payload?.suggestion?.action === 'switch_provider') {
+          const sug = err.payload.suggestion;
+          setError(err.payload?.error?.message || err.message || 'An unknown error occurred.');
+          setSuggestion({ recommended: sug.recommended, message: sug.message, reason: sug.reason });
+        } else {
+          setError(err.message || "An unknown error occurred.");
+          setSuggestion(null);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -150,6 +159,25 @@ const App: React.FC = () => {
           <div className="mt-10">
             {isLoading && <LoadingSpinner />}
             {error && <ErrorMessage message={error} />}
+            {suggestion && (
+              <div className="w-full max-w-2xl mx-auto mt-3 p-3 bg-amber-900/40 border border-amber-700 text-amber-200 rounded-lg flex items-center justify-between gap-3">
+                <div className="text-sm">
+                  <div className="font-semibold">Suggestion</div>
+                  <div>{suggestion.message || 'The current provider seems unavailable.'}</div>
+                </div>
+                <div>
+                  <button
+                    type="button"
+                    className="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-md text-sm"
+                    onClick={() => {
+                      if (suggestion?.recommended) setSelectedProviderId(suggestion.recommended);
+                    }}
+                  >
+                    Switch to {providers.find(p => p.id === suggestion.recommended)?.name || suggestion.recommended}
+                  </button>
+                </div>
+              </div>
+            )}
             {manual && (
               <ManualDisplay
                 manual={manual}

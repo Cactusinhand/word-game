@@ -133,7 +133,7 @@ const WordInputForm: React.FC<WordInputFormProps> = ({
         <button
           type="submit"
           disabled={isLoading || !word.trim()}
-          className="bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-bold h-full px-6 transition-colors duration-300 flex items-center justify-center"
+          className="bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-bold h-full px-6 transition-colors duration-300 flex items-center justify-center rounded-r-full"
         >
           {isLoading ? (
             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
